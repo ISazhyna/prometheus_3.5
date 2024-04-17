@@ -1,0 +1,22 @@
+VERSION := 1.0.0
+IMAGE_TAG := my_image_tag
+
+.PHONY: all clean
+
+all: linux darwin windows
+
+clean:
+	@echo "Cleaning up..."
+	@docker rmi $(IMAGE_TAG)
+
+linux:
+	@echo "Building for Linux..."
+	@GOOS=linux GOARCH=amd64 go build -o my_app_linux_$(VERSION)
+
+darwin:
+	@echo "Building for macOS..."
+	@GOOS=darwin GOARCH=amd64 go build -o my_app_macos_$(VERSION)
+
+windows:
+	@echo "Building for Windows..."
+	@GOOS=windows GOARCH=amd64 go build -o my_app_windows_$(VERSION).exe

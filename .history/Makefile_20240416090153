@@ -1,0 +1,24 @@
+# targets for different platforms and archs
+TARGETS = linux windows darwin
+
+# vars for different platforms and archs
+LINUX_ARCH = amd64 arm64
+WINDOWS_ARCH = amd64
+DARWIN_ARCH = amd64 arm64
+
+# general vars
+GOOS = $(patsubst %,%,$(TARGET))
+GOARCH = $(ARCH)
+
+
+
+
+build:
+  echo $(TARGET)
+  echo $(ARCH)
+// docker buildx build --platform=$(GOOS)/$(GOARCH) -t my-app:$(GOOS)-$(GOARCH) --load .
+
+clean:
+	docker rmi $$(docker images -q my-app:*)
+
+.PHONY: $(TARGETS) build clean
