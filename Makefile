@@ -20,57 +20,38 @@ D = \033[0m#      DEFAULT
 A = \007#         BEEP
 
 APP=$(shell basename $(shell git remote get-url origin))
-REGESTRY=umanetsvitaliy
+REGISTRY=umanetsvitaliy
 VERSION=$(shell git describe --tags --abbrev=0)-$(shell git rev-parse --short HEAD)
-	
-format:
-	gofmt -s -w ./
 
-get:
-	go get
-
-lint:
-	golint
-
-test:
-	go test -v
-
-build: format get
+build:
 	@printf "$GDetected OS/ARCH: $R$(detected_OS)/$(detected_arch)$D\n"
 	CGO_ENABLED=0 GOOS=$(detected_OS) GOARCH=$(detected_arch) go build -v -o kbot -ldflags "-X="github.com/vit-um/kbot/cmd.appVersion=${VERSION}
 
-linux: format get
+linux:
 	@printf "$GTarget OS/ARCH: $Rlinux/$(detected_arch)$D\n"
 	CGO_ENABLED=0 GOOS=linux GOARCH=$(detected_arch) go build -v -o kbot -ldflags "-X="github.com/vit-um/kbot/cmd.appVersion=${VERSION}
-	docker build --build-arg name=linux -t ${REGESTRY}/${APP}:${VERSION}-linux-$(detected_arch) .
+	docker build --build-arg name=linux -t ${REGISTRY}/${APP}:${VERSION}-linux-$(detected_arch) .
 
-windows: format get
+windows:
 	@printf "$GTarget OS/ARCH: $Rwindows/$(detected_arch)$D\n"
 	CGO_ENABLED=0 GOOS=windows GOARCH=$(detected_arch) go build -v -o kbot -ldflags "-X="github.com/vit-um/kbot/cmd.appVersion=${VERSION}
-	docker build --build-arg name=windows -t ${REGESTRY}/${APP}:${VERSION}-windows-$(detected_arch) .
+	docker build --build-arg name=windows -t ${REGISTRY}/${APP}:${VERSION}-windows-$(detected_arch) .
 
-darwin:format get
+darwin:
 	@printf "$GTarget OS/ARCH: $Rdarwin/$(detected_arch)$D\n"
 	CGO_ENABLED=0 GOOS=darwin GOARCH=$(detected_arch) go build -v -o kbot -ldflags "-X="github.com/vit-um/kbot/cmd.appVersion=${VERSION}
-	docker build --build-arg name=darwin -t ${REGESTRY}/${APP}:${VERSION}-darwin-$(detected_arch) .
+	docker build --build-arg name=darwin -t ${REGISTRY}/${APP}:${VERSION}-darwin-$(detected_arch) .
 
-arm: format get
+arm:
 	@printf "$GTarget OS/ARCH: $R$(detected_OS)/arm$D\n"
 	CGO_ENABLED=0 GOOS=$(detected_OS) GOARCH=arm go build -v -o kbot -ldflags "-X="github.com/vit-um/kbot/cmd.appVersion=${VERSION}
-	docker build --build-arg name=arm -t ${REGESTRY}/${APP}:${VERSION}-$(detected_OS)-arm .
+	docker build --build-arg name=arm -t ${REGISTRY}/${APP}:${VERSION}-$(detected_OS)-arm .
 
 image: build
-	docker build . -t ${REGESTRY}/${APP}:${VERSION}-$(detected_arch)
+	docker build . -t ${REGISTRY}/${APP}:${VERSION}-$(detected_arch)
 
 push:
-	docker push ${REGESTRY}/${APP}:${VERSION}-$(detected_arch)
-
-dive: image
-	IMG1=$$(docker images -q | head -n 1); \
-	CI=true docker run -ti --rm -v /var/run/docker.sock:/var/run/docker.sock wagoodman/dive --ci --lowestEfficiency=0.99 $${IMG1}; \
-	IMG2=$$(docker images -q | sed -n 2p); \
-	docker rmi $${IMG1}; \
-	docker rmi $${IMG2}
+	docker push ${REGISTRY}/${APP}:${VERSION}-$(detected_arch)
 
 clean:
 	@rm -rf kbot; \
